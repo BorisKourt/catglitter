@@ -20,8 +20,8 @@
   (y-pos screen (rand-int ciel)))
 
 (defn random-point [screen]
-  [(y-rand screen (height screen))
-   (x-rand screen (width screen))])
+  [(x-rand screen (width screen))
+   (y-rand screen (height screen))])
 
 (defn set-position
   "Sets the position with physics body."

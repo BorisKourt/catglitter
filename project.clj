@@ -1,4 +1,4 @@
-(defproject com.sugarbagel/catglitter "0.2.1"
+(defproject com.sugarbagel/catglitter "0.2.2"
   :description "Cat Glitter"
   
   :dependencies [[com.badlogicgames.gdx/gdx "1.6.5"]

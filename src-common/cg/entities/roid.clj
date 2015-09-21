@@ -11,7 +11,9 @@
 
 (def roid-base
   {:type      :roid
-   :attached? false})
+   :attached? false
+   :resource-type :diamond
+   :resource-amount 10})
 
 (defn create!
   [screen texture & [x y a]]
@@ -21,7 +23,7 @@
          (shared/base-physics-entity screen x y a)
 
          ;; Game Logic:
-         roid-base))
+         (assoc roid-base :resource (inc (rand-int 9)))))
 
 (def spawn! (partial shared/spawn! create!))
 

@@ -17,7 +17,7 @@
                  :renderer (stage)
                  :world (box-2d (width screen) (height screen)))
 
-        ;; Loading the tilesheet
+        ;; Loading the spritesheet
         sheet (texture "roidsheet.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
         roid-image-a (texture (aget tiles 0 0))
@@ -28,7 +28,7 @@
         roid-entities (mapv                                 ;; outputs a vector instead of a list (look at filterv)
                         (fn [n]
                           (if (even? n)
-                            (roid/random-spawn! screen roid-image-a)
+                            (assoc (roid/random-spawn! screen roid-image-a) :attached? true)
                             (roid/random-spawn! screen roid-image-b)))
                         (range 20))
 
@@ -36,10 +36,62 @@
         ship (ship/spawn! screen ship-image (u/center-x screen) (u/center-y screen) 0)]
     (conj roid-entities ship)))
 
+(defn destroy-depleted [screen entities]
+  (filter
+    (fn [entity]
+      (if (and (= :roid (:type entity))
+               (>= 0 (:resource entity)))
+        false                                               ;; change texture.
+        true))
+    entities))
+
+(defn update-asteroid-status [screen entities]
+  (map
+    (fn [entity]
+      (if (and (= :roid (:type entity))
+               (:attached? entity))
+        (assoc entity :resource (dec (:resource entity)))
+        entity))
+    entities))
+
+(defn move-roids [screen entities]
+  (map
+    (fn [entity]
+      (case (:type entity)
+        :ship entity
+        :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
+    entities))
+
+(defn destroy-offscreen [screen entities]
+  (filter
+    (fn [entity]
+      (if (and (= :roid (:type entity))
+               (or (>= (- 0 s/sprite-width) (:x entity))
+                   (>= (- 0 s/sprite-width) (:x entity))))
+        false                                               ;; change texture.
+        true))
+    entities))
+
+(defn possibly-asteroid [screen entities]
+  (let [sheet (texture "roidsheet.png")
+        tiles (texture! sheet :split s/sprite-width s/sprite-width)
+        roid-image-a (texture (aget tiles 0 0))]
+    (if (= 5 (rand-int 256))
+      (conj entities (roid/random-spawn! screen roid-image-a))
+      entities)))
+
 (defn on-render [screen entities]
   (clear!)
   #_(step! screen entities)                                 ;; Leave until physics are needed.
-  (render! screen entities))
+  (->> entities
+       ;; all your game logic here.
+       ;; (destroy-offscreen screen)
+       ;; (update-asteroid-status screen)
+       (move-roids screen)
+       (destroy-offscreen screen)
+       (destroy-depleted screen)
+       (possibly-asteroid screen)
+       (render! screen)))
 
 (defn random-move [screen entities]
   (map
@@ -49,17 +101,22 @@
             input-y (u/y-pos screen (:input-y screen))]
         (case (:type entity)
           :ship (u/set-position entity input-x input-y)
-          :roid (u/set-position entity rand-x rand-y))))
+          :roid entity)))
     entities))
 
-(defn on-touch-up [screen entities]
+
+(defn on-touch-up
+  "It must return entities."
+  [screen entities]
   (println "\n\n :on-touch-up")
   (println (:input-x screen))                               ; the x position of the finger/mouse
   (println (:input-y screen))                               ; the y position of the finger/mouse
   (println (:pointer screen))                               ; the pointer for the event
   (println (:button screen))                                ; the mouse button that was released (see button-code)
 
-  (random-move screen entities))
+  (->> entities
+       (update-asteroid-status screen)
+       (random-move screen)))
 
 (defn on-hide
   [screen entities]
