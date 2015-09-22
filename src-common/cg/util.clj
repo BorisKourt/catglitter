@@ -23,6 +23,10 @@
   [(x-rand screen (width screen))
    (y-rand screen (height screen))])
 
+(defn random-point [screen]
+  [(x-rand screen (width screen))
+   (y-rand screen (height screen))])
+
 (defn set-position
   "Sets the position with physics body."
   [entity x y]

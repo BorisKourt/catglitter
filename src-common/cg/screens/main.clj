@@ -30,7 +30,7 @@
                           (if (even? n)
                             (assoc (roid/random-spawn! screen roid-image-a) :attached? true)
                             (roid/random-spawn! screen roid-image-b)))
-                        (range 20))
+                        (range 200))
 
         ;; Creating a ship entity
         ship (ship/spawn! screen ship-image (u/center-x screen) (u/center-y screen) 0)]
