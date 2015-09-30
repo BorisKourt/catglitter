@@ -51,3 +51,4 @@
     (first (u/random-point screen))
     (second (u/random-point screen))
     (rand-int 360)))
+

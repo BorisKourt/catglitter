@@ -10,7 +10,10 @@
 (defn x-pos [_ x]
   (- x s/half-sprite))
 
-(defn y-pos [screen y]
+(defn y-pos [_ y]
+  (- y s/half-sprite))
+
+(defn y-pos-on-click [screen y]
   (- (height screen) y s/half-sprite)) ;; because y is inverted?
 
 (defn x-rand [screen ciel]

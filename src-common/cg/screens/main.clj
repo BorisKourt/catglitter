@@ -39,10 +39,8 @@
 (defn destroy-depleted [screen entities]
   (filter
     (fn [entity]
-      (if (and (= :roid (:type entity))
-               (>= 0 (:resource entity)))
-        false                                               ;; change texture.
-        true))
+      (not (and (= :roid (:type entity))
+               (>= 0 (:resource entity)))))
     entities))
 
 (defn update-asteroid-status [screen entities]
@@ -63,21 +61,23 @@
     entities))
 
 (defn destroy-offscreen [screen entities]
-  (filter
-    (fn [entity]
-      (if (and (= :roid (:type entity))
-               (or (>= (- 0 s/sprite-width) (:x entity))
-                   (>= (- 0 s/sprite-width) (:x entity))))
-        false                                               ;; change texture.
-        true))
-    entities))
+  (println (count entities))
+  (if (> (count entities) 100)
+      (->> entities
+       #_(filter
+         (fn [entity]
+           (and (= :roid (:type entity))
+                (or (>= (- 0 s/sprite-width) (:x entity))
+                    (>= (- 0 s/sprite-height) (:y entity))))))
+       (take 100))
+      entities))
 
 (defn possibly-asteroid [screen entities]
   (let [sheet (texture "roidsheet.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
         roid-image-a (texture (aget tiles 0 0))]
-    (if (= 5 (rand-int 256))
-      (conj entities (roid/random-spawn! screen roid-image-a))
+    (if (= 5 (rand-int 10))
+      (conj entities (roid/spawn-edge! screen roid-image-a))
       entities)))
 
 (defn on-render [screen entities]
@@ -89,16 +89,27 @@
        ;; (update-asteroid-status screen)
        (move-roids screen)
        (destroy-offscreen screen)
-       (destroy-depleted screen)
+       #_(destroy-depleted screen)
        (possibly-asteroid screen)
        (render! screen)))
 
-(defn random-move [screen entities]
+#_(defn random-move [screen entities]
+    (map
+      (fn [entity]
+        (let [[rand-x rand-y] (u/random-point screen)
+              input-x (u/x-pos screen (:input-x screen))
+              input-y (u/y-pos screen (:input-y screen))]
+          (case (:type entity)
+            :ship (u/set-position entity input-x input-y)
+            :roid entity)))
+      entities))
+
+(defn click-move [screen entities]
   (map
     (fn [entity]
       (let [[rand-x rand-y] (u/random-point screen)
             input-x (u/x-pos screen (:input-x screen))
-            input-y (u/y-pos screen (:input-y screen))]
+            input-y (u/y-pos-on-click screen (:input-y screen))]
         (case (:type entity)
           :ship (u/set-position entity input-x input-y)
           :roid entity)))
@@ -116,7 +127,7 @@
 
   (->> entities
        (update-asteroid-status screen)
-       (random-move screen)))
+       (click-move screen)))
 
 (defn on-hide
   [screen entities]
