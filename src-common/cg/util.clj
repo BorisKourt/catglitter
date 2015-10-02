@@ -7,20 +7,18 @@
     [play-clj.math :refer :all]
     [play-clj.ui :refer :all]))
 
-(defn x-pos [_ x]
+;; DRAW THE ENTITY FROM THE MIDDLE
+(defn trans-pos [_ x]
   (- x s/half-sprite))
 
-(defn y-pos [_ y]
-  (- y s/half-sprite))
-
-(defn y-pos-on-click [screen y]
-  (- (height screen) y s/half-sprite)) ;; because y is inverted?
+(defn flip-y-axis [screen y]
+  (- (height screen) y))
 
 (defn x-rand [screen ciel]
-  (x-pos screen (rand-int ciel)))
+  (trans-pos screen (rand-int ciel)))
 
 (defn y-rand [screen ciel]
-  (y-pos screen (rand-int ciel)))
+  (trans-pos screen (rand-int ciel)))
 
 (defn random-point [screen]
   [(x-rand screen (width screen))

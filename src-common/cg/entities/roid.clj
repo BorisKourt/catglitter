@@ -31,10 +31,10 @@
 
 (defn spawn-top [screen]
   [(- 0 (- s/half-sprite (u/x-rand screen (+ s/sprite-width (width screen)))))
-   (u/y-pos screen (+ s/half-sprite (height screen)))])
+   (u/trans-pos screen (+ s/half-sprite (height screen)))])
 
 (defn spawn-right [screen]
-  [(u/x-pos screen (+ s/half-sprite (width screen)))
+  [(u/trans-pos screen (+ s/half-sprite (width screen)))
    (- 0 (- s/half-sprite (u/y-rand screen (+ s/sprite-width (height screen)))))])
 
 (defn spawn-off-edge [create-fun screen texture]
