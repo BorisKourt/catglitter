@@ -20,7 +20,7 @@
                  :world (box-2d (width screen) (height screen)))
 
         ;; Loading the spritesheet
-        sheet (texture "roidsheet.png")
+        sheet (texture "ship.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
         roid-image-a (texture (aget tiles 0 0))
         roid-image-b (texture (aget tiles 0 1))
@@ -63,6 +63,8 @@
         :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
     entities))
 
+(defn spin-roids [screen entities])
+
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
 (defn destroy-offscreen [screen entities]
   (let [new-entities (->> entities
@@ -77,8 +79,8 @@
 (defn possibly-asteroid [screen entities]
   (let [sheet (texture "roidsheet.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
-        roid-image-a (texture (aget tiles 0 0))]
-    (if (= 5 (rand-int 200))
+        roid-image-a (texture (aget tiles (rand-int 6) (rand-int 3)))]
+    (if (= 5 (rand-int 15))
       (conj entities (roid/spawn-edge! screen roid-image-a))
       entities)))
 
@@ -88,7 +90,7 @@
   (->> entities
        ;; all your game logic here.
        ;; (update-asteroid-status screen)
-       #_(move-roids screen)
+       (move-roids screen)
        (destroy-offscreen screen)
        #_(destroy-depleted screen)
        (possibly-asteroid screen)
