@@ -14,7 +14,10 @@
    :attached?       false
    :resource-type   :diamond
    :resource-amount 10
-   :speed (/ (* 2 (+ 1 (rand-int 5))) 10)})
+   :x-speed (rand-nth (range 0.2 1 0.2))
+   :y-speed (rand-nth (range 0.2 1 0.2))
+   :x-dir (rand-int 2)
+   :y-dir (rand-int 2)})
 
 (defn create!
   [screen texture & [x y a]]
