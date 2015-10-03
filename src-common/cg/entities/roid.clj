@@ -16,8 +16,12 @@
    :resource-amount 10
    :x-speed (rand-nth (range 0.2 1 0.2))
    :y-speed (rand-nth (range 0.2 1 0.2))
-   :x-dir (rand-int 2)
-   :y-dir (rand-int 2)})
+   :x-dir (if (= 0 (rand-int 2))
+            +
+            -)
+   :y-dir (if (= 0 (rand-int 2))
+            +
+            -)})
 
 (defn create!
   [screen texture & [x y a]]
