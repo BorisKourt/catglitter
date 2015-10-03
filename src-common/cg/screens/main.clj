@@ -92,6 +92,9 @@
        (destroy-offscreen screen)
        #_(destroy-depleted screen)
        (possibly-asteroid screen)
+       ((fn [entities]
+          (println "hit????" (some :hit? entities))
+          entities))
        (render! screen)))
 
 (defn random-move [screen entities]
@@ -110,23 +113,26 @@
 (defn click-move [screen entities]
   (map
     (fn [entity]
-      (let [[rand-x rand-y] (u/random-point screen)
-            input-x (u/trans-pos screen (:input-x screen))
+      (let [input-x (u/trans-pos screen (:input-x screen))
             input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
         (case (:type entity)
           :ship (u/set-position entity input-x input-y)
           :roid entity)))
     entities))
 
-(defn hit-roid? [x y entities]
-  (some
-    (fn [entity]
-      (and (= :roid (:type entity))
-           (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
-           (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite)
-           entity))
-    entities))
+(defn hit-roid? [x y entity]
+  (and (= :roid (:type entity))
+       (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
+       (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite)
+       ))
 
+(defn process-hit [x y entities]
+  (map
+    (fn [entity]
+      (if (hit-roid? x y entity)
+        (assoc entity :hit? true)
+        (assoc entity :hit? false)))
+    entities))
 
 ;; WHEN CLICKED/TOUCHED ON SCREEN
 (defn on-touch-up
@@ -143,7 +149,8 @@
       (println "HITTTTT!!!!!!" hit))
     (->> entities
          #_(update-asteroid-status screen)
-         (click-move screen))))
+         (click-move screen)
+         (process-hit new-x new-y))))
 
 (defn on-hide
   [screen entities]
