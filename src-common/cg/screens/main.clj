@@ -63,7 +63,7 @@
         :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
     entities))
 
-(defn rand-direction [entities]
+#_(defn rand-direction [entities]
   (map))
 
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS

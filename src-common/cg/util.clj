@@ -5,8 +5,7 @@
     [play-clj.g2d :refer :all]
     [play-clj.g2d-physics :refer :all]
     [play-clj.math :refer :all]
-    [play-clj.ui :refer :all]
-    [cg.entities.roid :as roid]))
+    [play-clj.ui :refer :all]))
 
 ;; DRAW THE ENTITY FROM THE MIDDLE
 (defn trans-pos [_ x]
@@ -37,11 +36,3 @@
 
 (defn center-y [screen]
   (- (/ (height screen) 2) s/half-sprite))
-
-(defn speed []
-  (case (rand-int 5)
-    0 (assoc roid/roid-base :speed 0.2)
-    1 (assoc roid/roid-base :speed 0.4)
-    2 (assoc roid/roid-base :speed 0.6)
-    3 (assoc roid/roid-base :speed 0.8)
-    4 (assoc roid/roid-base :speed 1)))
