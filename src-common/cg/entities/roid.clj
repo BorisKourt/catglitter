@@ -13,7 +13,8 @@
   {:type            :roid
    :attached?       false
    :resource-type   :diamond
-   :resource-amount 10})
+   :resource-amount 10
+   :speed (/ (* 2 (+ 1 (rand-int 5))) 10)})
 
 (defn create!
   [screen texture & [x y a]]

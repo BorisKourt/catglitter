@@ -55,13 +55,16 @@
           entity))
       entities))
 
-(defn move-roids [screen entities]
+(defn move-roids [entities]
   (map
     (fn [entity]
       (case (:type entity)
         :ship entity
         :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
     entities))
+
+(defn rand-direction [entities]
+  (map))
 
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
 (defn destroy-offscreen [screen entities]
@@ -88,7 +91,7 @@
   (->> entities
        ;; all your game logic here.
        ;; (update-asteroid-status screen)
-       #_(move-roids screen)
+       #_(move-roids)
        (destroy-offscreen screen)
        #_(destroy-depleted screen)
        (possibly-asteroid screen)
