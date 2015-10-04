@@ -84,9 +84,9 @@
   (map (fn [entity]
          (if (= :ship (:type entity))
            entity
-           (let [{:keys [x-speed y-speed x-dir y-dir]} entity]
-             (u/set-position entity (x-dir (:x entity) x-speed) (y-dir (:y entity) y-speed))))
-         entities)))
+           (let [{:keys [x-speed y-speed x-dir y-dir x y]} entity]
+             entity))
+             entities)))
 
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
 (defn destroy-offscreen [screen entities]
