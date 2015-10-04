@@ -38,7 +38,7 @@
         ship (ship/spawn! screen ship-image (u/center-x screen) (u/center-y screen) 0)]
     (conj roid-entities ship)))
 
-#_(defn destroy-depleted [screen entities]
+(defn destroy-depleted [screen entities]
     (filter
       (fn [entity]
         (not (and (= :roid (:type entity))
@@ -46,7 +46,7 @@
       entities))
 
 
-#_(defn update-asteroid-status [screen entities]
+(defn update-asteroid-status [screen entities]
     (map
       (fn [entity]
         (if (and (= :roid (:type entity))
@@ -95,7 +95,7 @@
        (destroy-offscreen screen)
        #_(destroy-depleted screen)
        (possibly-asteroid screen)
-       ((fn [entities]
+       #_((fn [entities]
           (println "hit????" (some :hit? entities))
           entities))
        (render! screen)))
