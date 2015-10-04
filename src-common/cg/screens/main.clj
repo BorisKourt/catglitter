@@ -39,21 +39,21 @@
     (conj roid-entities ship)))
 
 (defn destroy-depleted [screen entities]
-    (filter
-      (fn [entity]
-        (not (and (= :roid (:type entity))
-                  (>= 0 (:resource entity)))))
-      entities))
+  (filter
+    (fn [entity]
+      (not (and (= :roid (:type entity))
+                (>= 0 (:resource entity)))))
+    entities))
 
 
 (defn update-asteroid-status [screen entities]
-    (map
-      (fn [entity]
-        (if (and (= :roid (:type entity))
-                 (:attached? entity))
-          (assoc entity :resource (dec (:resource entity)))
-          entity))
-      entities))
+  (map
+    (fn [entity]
+      (if (and (= :roid (:type entity))
+               (:attached? entity))
+        (assoc entity :resource (dec (:resource entity)))
+        entity))
+    entities))
 
 (defn move-roids [screen entities]
   (map
@@ -81,8 +81,16 @@
   (let [sheet (texture "roidsheet.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
         roid-image-a (texture (aget tiles (rand-int 6) (rand-int 3)))]
-    (if (= 5 (rand-int 15))
+    (if (= 5 (rand-int 40))
       (conj entities (roid/spawn-edge! screen roid-image-a))
+      entities)))
+
+(defn possibly-cat [screen entities]
+  (let [sheet (texture "cat.png")
+        tiles (texture! sheet :split s/sprite-width s/sprite-width)
+        cat (texture (aget tiles 0 0))]
+    (if (= 5 (rand-int 1000))
+      (conj entities (roid/spawn-edge! screen cat))
       entities)))
 
 (defn on-render [screen entities]
@@ -94,10 +102,11 @@
        (move-roids screen)
        (destroy-offscreen screen)
        #_(destroy-depleted screen)
+       (possibly-cat screen)
        (possibly-asteroid screen)
        #_((fn [entities]
-          (println "hit????" (some :hit? entities))
-          entities))
+            (println "hit????" (some :hit? entities))
+            entities))
        (render! screen)))
 
 (defn random-move [screen entities]
@@ -144,7 +153,7 @@
   (let [new-y (u/flip-y-axis screen (:input-y screen))
         new-x (:input-x screen)]
     (println "\n\n :on-touch-up")
-    (println new-x)                             ; the x position of the finger/mouse
+    (println new-x)                                         ; the x position of the finger/mouse
     (println new-y)                                         ; the y position of the finger/mouse
     (println (:pointer screen))                             ; the pointer for the event
     (println (:button screen))                              ; the mouse button that was released (see button-code)
