@@ -26,10 +26,10 @@
 
 (defn set-position
   "Sets the position with physics body."
-  [entity x y]
+  [entity x y angle]
   (doto
-    (assoc entity :x x :y y)
-    (body-position! x y (:angle entity))))
+    (assoc entity :x x :y y :angle angle)
+    (body-position! x y angle)))
 
 (defn center-x [screen]
   (- (/ (width screen) 2) s/half-sprite))

@@ -60,10 +60,11 @@
     (fn [entity]
       (case (:type entity)
         :ship entity
-        :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
+        :roid (u/set-position entity
+                              (- (:x entity) 0.5)
+                              (- (:y entity) 0.5)
+                              (+ (:angle entity) (:spin entity)))))
     entities))
-
-(defn spin-roids [screen entities])
 
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
 (defn destroy-offscreen [screen entities]
@@ -106,7 +107,7 @@
             input-x (u/trans-pos screen (:input-x screen))
             input-y (u/trans-pos screen (:input-y screen))]
         (case (:type entity)
-          :ship (u/set-position entity input-x input-y)
+          :ship (u/set-position entity input-x input-y 0)
           :roid entity)))
     entities))
 
@@ -118,7 +119,7 @@
       (let [input-x (u/trans-pos screen (:input-x screen))
             input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
         (case (:type entity)
-          :ship (u/set-position entity input-x input-y)
+          :ship (u/set-position entity input-x input-y 0)
           :roid entity)))
     entities))
 

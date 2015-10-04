@@ -23,7 +23,8 @@
          (shared/base-physics-entity screen x y a)
 
          ;; Game Logic:
-         (assoc roid-base :resource (inc (rand-int 9)))))
+         (assoc roid-base :resource (inc (rand-int 9)))
+         (assoc roid-base :spin (rand-nth (range -0.5 0.5 0.01)))))
 
 (def spawn! (partial shared/spawn! create!))
 
