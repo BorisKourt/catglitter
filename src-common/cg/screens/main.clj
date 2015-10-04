@@ -55,21 +55,38 @@
           entity))
       entities))
 
+(defn reel-in [screen entities]
+  (let [{ix :x iy :y} (first (filter #(= :ship (:type %)) entities))]
+    (println "weee" ix ", " iy)
+    (println entities)
+    (map (fn [entity]
+           (if (and (= (:hit entity) true)
+                    (= (:type entity) :roid))
+             (let [x-speed (Math/abs (- ix (:x entity)))
+                   y-speed (Math/abs (- iy (:y entity)))
+                   x-dir (if (> ix (:x entity))
+                           +
+                           -)
+                   y-dir (if (> iy (:y entity))
+                           +
+                           -)]
+               (assoc entity :x-speed x-speed :y-speed y-speed :x-dir x-dir :y-dir y-dir))))
+         entities)))
+
 (defn move-roids [entities]
   (map (fn [entity]
-      (case (:type entity)
-        :ship entity
-        :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
-    entities))
-
-(defn rand-direction [entities]
-  (map (fn [entity]
-         (let [x-speed (:x-speed entity)
-               x-dir (:x-dir entity)
-               y-speed (:y-speed entity)
-               y-dir (:y-dir entity)]
-           (u/set-position entity (x-dir (:x entity) x-speed) (y-dir (:y entity) y-speed))))
+         (case (:type entity)
+           :ship entity
+           :roid (u/set-position entity (dec (:x entity)) (dec (:y entity)))))
        entities))
+
+(defn rand-direction [screen entities]
+  (map (fn [entity]
+         (if (= :ship (:type entity))
+           entity
+           (let [{:keys [x-speed y-speed x-dir y-dir]} entity]
+             (u/set-position entity (x-dir (:x entity) x-speed) (y-dir (:y entity) y-speed))))
+         entities)))
 
 ;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
 (defn destroy-offscreen [screen entities]
@@ -90,20 +107,14 @@
       (conj entities (roid/spawn-edge! screen roid-image-a))
       entities)))
 
+;; FRAMES REFRESH CONSTANTLY
 (defn on-render [screen entities]
   (clear!)
-  #_(step! screen entities)                                 ;; Leave until physics are needed.
+  #_(step! screen entities)
   (->> entities
-       ;; all your game logic here.
-       ;; (update-asteroid-status screen)
-       (move-roids)
-       #_(rand-direction)
-       (destroy-offscreen screen)
-       #_(destroy-depleted screen)
        (possibly-asteroid screen)
-       ((fn [entities]
-          (println "hit????" (some :hit? entities))
-          entities))
+       (rand-direction screen)
+       (destroy-offscreen screen)
        (render! screen)))
 
 (defn random-move [screen entities]
@@ -150,7 +161,7 @@
   (let [new-y (u/flip-y-axis screen (:input-y screen))
         new-x (:input-x screen)]
     (println "\n\n :on-touch-up")
-    (println new-x)                             ; the x position of the finger/mouse
+    (println new-x)                                         ; the x position of the finger/mouse
     (println new-y)                                         ; the y position of the finger/mouse
     (println (:pointer screen))                             ; the pointer for the event
     (println (:button screen))                              ; the mouse button that was released (see button-code)
@@ -158,7 +169,8 @@
       (println "HITTTTT!!!!!!" hit))
     (->> entities
          #_(update-asteroid-status screen)
-         (click-move screen)
+         #_(click-move screen)
+         (reel-in screen)
          (process-hit new-x new-y))))
 
 (defn on-hide
