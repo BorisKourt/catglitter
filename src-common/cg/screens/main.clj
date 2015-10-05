@@ -77,6 +77,21 @@
     #_(println "entities removed" (- (count entities) (count new-entities)))
     new-entities))
 
+(defn destroy-offscreen2 [screen entities]
+  (let [new-entities (filter #(and (or (= :roid (:type %))
+                                       (= :ship (:type %)))
+                                   (or (<= (- 0 s/sprite-width) (:x %))
+                                       (<= (- 0 s/sprite-width) (:y %)))) entities)]
+    (println "current amount of entities" (count (into [] new-entities)))
+    new-entities))
+
+#_(filter (and (= :roid (:type entities) entities)
+               (or (<= (- 0 (* 2 s/sprite-width)) (:x entities))
+                   (>= (- 0 (* 2 s/sprite-width)) (:y entities))))
+          entities)
+
+
+
 (defn possibly-asteroid [screen entities]
   (let [sheet (texture "roidsheet.png")
         tiles (texture! sheet :split s/sprite-width s/sprite-width)
@@ -100,7 +115,7 @@
        ;; all your game logic here.
        ;; (update-asteroid-status screen)
        (move-roids screen)
-       (destroy-offscreen screen)
+       (destroy-offscreen2 screen)
        #_(destroy-depleted screen)
        (possibly-cat screen)
        (possibly-asteroid screen)
