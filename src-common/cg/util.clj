@@ -36,3 +36,6 @@
 
 (defn center-y [screen]
   (- (/ (height screen) 2) s/half-sprite))
+
+(defn is-type? [type entity]
+  (= (:type entity) type))

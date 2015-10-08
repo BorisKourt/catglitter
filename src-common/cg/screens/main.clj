@@ -127,36 +127,30 @@
 (defn random-move [screen entities]
   (map
     (fn [entity]
-      (let [[rand-x rand-y] (u/random-point screen)
-            input-x (u/trans-pos screen (:input-x screen))
+      (let [input-x (u/trans-pos screen (:input-x screen))
             input-y (u/trans-pos screen (:input-y screen))]
         (case (:type entity)
           :ship (u/set-position entity input-x input-y 0)
           :roid entity)))
     entities))
 
-
 ;; DRAW SHIP AT MOUSE CLICK - NOTE CLICK PTS (0,0) ARE FROM TOP LEFT, DRAW (0,0) IS FROM BOTTOM LEFT
 (defn click-move [screen entities]
-  (map
-    (fn [entity]
-      (let [input-x (u/trans-pos screen (:input-x screen))
-            input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
-        (case (:type entity)
-          :ship (u/set-position entity input-x input-y 0)
-          :roid entity)))
-    entities))
-
-(defn hit-roid? [x y entity]
-  (and (= :roid (:type entity))
-       (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
-       (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite)
-       ))
+  (->> entities
+       (map
+         (fn [entity]
+           (if (u/is-type? :ship entity)
+              (let [input-x (u/trans-pos screen (:input-x screen))
+                    input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
+               (  u/set-position entity input-x input-y 0))
+              entity)))))
 
 (defn process-hit [x y entities]
   (map
     (fn [entity]
-      (if (hit-roid? x y entity)
+      (if (and (u/is-type? :roid entity)
+                (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
+                (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite))
         (assoc entity :hit? true)
         (assoc entity :hit? false)))
     entities))
@@ -172,8 +166,6 @@
     (println new-y)                                         ; the y position of the finger/mouse
     (println (:pointer screen))                             ; the pointer for the event
     (println (:button screen))                              ; the mouse button that was released (see button-code)
-    (when-let [hit (hit-roid? new-x new-y entities)]
-      (println "HITTTTT!!!!!!" hit))
     (->> entities
          #_(update-asteroid-status screen)
          (click-move screen)
