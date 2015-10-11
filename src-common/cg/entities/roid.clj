@@ -13,7 +13,8 @@
   {:type            :roid
    :attached?       false
    :resource-type   :diamond
-   :resource-amount 10})
+   :resource-amount 10
+   })
 
 (defn create!
   [screen texture & [x y a]]
@@ -23,8 +24,16 @@
          (shared/base-physics-entity screen x y a)
 
          ;; Game Logic:
-         (assoc roid-base :resource (inc (rand-int 9)))
-         (assoc roid-base :spin (rand-nth (range -0.5 0.5 0.01)))))
+         (assoc roid-base :resource (inc (rand-int 9))
+                          :spin (rand-nth (range -0.5 0.5 0.01))
+                          :x-speed (rand-nth (range 0.2 1 0.2))
+                          :y-speed (rand-nth (range 0.2 1 0.2))
+                          :x-dir (if (= 0 (rand-int 2))
+                                   +
+                                   -)
+                          :y-dir (if (= 0 (rand-int 2))
+                                   +
+                                   -))))
 
 (def spawn! (partial shared/spawn! create!))
 
@@ -44,7 +53,7 @@
                    1 (spawn-right screen))
         new-x (first spawn-pt)
         new-y (second spawn-pt)]
-    (println "spawning" new-x "," new-y)
+    #_(println "spawning" new-x "," new-y)
     (shared/spawn-with-physics!
       create-fun
       screen texture

@@ -17,11 +17,14 @@
   (let [screen
         (update! screen
                  :renderer (stage)
-                 :world (box-2d (width screen) (height screen)))
+                 :world (box-2d (width screen) (height screen))
+                 :texture-ship (texture! (texture "ship.png") :split s/sprite-width s/sprite-width)
+                 :texture-roid (texture! (texture "roidsheet.png") :split s/sprite-width s/sprite-width)
+                 :texture-cat (texture! (texture "cat.png") :split s/sprite-width s/sprite-width))
 
         ;; Loading the spritesheet
-        sheet (texture "ship.png")
-        tiles (texture! sheet :split s/sprite-width s/sprite-width)
+
+        tiles (:texture-ship screen)
         roid-image-a (texture (aget tiles 0 0))
         roid-image-b (texture (aget tiles 0 1))
         ship-image (texture (aget tiles 0 2))
@@ -66,56 +69,60 @@
                               (+ (:angle entity) (:spin entity)))))
     entities))
 
-;; GARBAGE COLLECTION - DELETES ASTEROID ENTITIES OUTSIDE SCREEN BOUNDS
-(defn destroy-offscreen [screen entities]
-  (let [new-entities (->> entities
-                          (remove
-                            (fn [entity]
-                              (and (= :roid (:type entity))
-                                   (or (>= (- 0 (* 4 s/sprite-width)) (:x entity))
-                                       (>= (- 0 (* 4 s/sprite-width)) (:y entity)))))))]
-    #_(println "entities removed" (- (count entities) (count new-entities)))
-    new-entities))
+(defn rand-direction
+  "Takes the random direction and speed asteroids spawn with and moves them"
+  [screen entities]
+  (map (fn [entity]
+         (if (u/is-type? :roid entity)
+           (let [x-speed (:x-speed entity)
+                 x-dir (:x-dir entity)
+                 y-speed (:y-speed entity)
+                 y-dir (:y-dir entity)]
+             (u/set-position entity
+                             (x-dir (:x entity) x-speed)
+                             (y-dir (:y entity) y-speed)
+                             (+ (:angle entity) (:spin entity))))
+           entity))
+       entities))
 
-(defn destroy-offscreen2 [screen entities]
-  (let [new-entities (filter #(and (or (= :roid (:type %))
-                                       (= :ship (:type %)))
-                                   (or (<= (- 0 s/sprite-width) (:x %))
-                                       (<= (- 0 s/sprite-width) (:y %)))) entities)]
-    (println "current amount of entities" (count (into [] new-entities)))
-    new-entities))
 
-#_(filter (and (= :roid (:type entities) entities)
-               (or (<= (- 0 (* 2 s/sprite-width)) (:x entities))
-                   (>= (- 0 (* 2 s/sprite-width)) (:y entities))))
-          entities)
+(defn destroy-offscreen
+  "Thanks oakes!"
+  [screen entities]
+  (remove
+    (fn [entity]
+      (let [e-size (* 4 s/sprite-width)
+            e-rect (rectangle (:x entity) (:y entity) e-size e-size)
+            screen-rect (rectangle 0 0 (game :width) (game :height))]
+        (and (= :roid (:type entity))
+             (not (rectangle! screen-rect :overlaps e-rect)))))
+    entities))
 
 
 
 (defn possibly-asteroid [screen entities]
-  (let [sheet (texture "roidsheet.png")
-        tiles (texture! sheet :split s/sprite-width s/sprite-width)
-        roid-image-a (texture (aget tiles (rand-int 6) (rand-int 3)))]
-    (if (= 5 (rand-int 40))
-      (conj entities (roid/spawn-edge! screen roid-image-a))
+  (let [roid-image (texture (aget (:texture-roid screen) (rand-int 6) (rand-int 3)))]
+    (if (= 5 (rand-int 10))
+      (do #_(println "Entities: " (count entities))
+        (conj entities (roid/spawn-edge! screen roid-image)))
       entities)))
 
 (defn possibly-cat [screen entities]
-  (let [sheet (texture "cat.png")
-        tiles (texture! sheet :split s/sprite-width s/sprite-width)
-        cat (texture (aget tiles 0 0))]
+  (let [cat (texture (aget (:texture-cat screen) 0 0))]
     (if (= 5 (rand-int 1000))
       (conj entities (roid/spawn-edge! screen cat))
       entities)))
 
-(defn on-render [screen entities]
+(defn on-render
+  "Continuously draws at 60 fps"
+  [screen entities]
   (clear!)
   #_(step! screen entities)                                 ;; Leave until physics are needed.
   (->> entities
        ;; all your game logic here.
        ;; (update-asteroid-status screen)
-       (move-roids screen)
-       (destroy-offscreen2 screen)
+       (rand-direction screen)
+       (destroy-offscreen screen)
        #_(destroy-depleted screen)
        (possibly-cat screen)
        (possibly-asteroid screen)
@@ -134,30 +141,32 @@
           :roid entity)))
     entities))
 
-;; DRAW SHIP AT MOUSE CLICK - NOTE CLICK PTS (0,0) ARE FROM TOP LEFT, DRAW (0,0) IS FROM BOTTOM LEFT
-(defn click-move [screen entities]
+(defn click-move
+  "Draw ship at mouse click - note click pts (0,0) are from top left, draw (0,0) is from bottom left"
+  [screen entities]
   (->> entities
        (map
          (fn [entity]
            (if (u/is-type? :ship entity)
-              (let [input-x (u/trans-pos screen (:input-x screen))
-                    input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
-               (  u/set-position entity input-x input-y 0))
-              entity)))))
+             (let [input-x (u/trans-pos screen (:input-x screen))
+                   input-y (u/trans-pos screen (u/flip-y-axis screen (:input-y screen)))]
+               (u/set-position entity input-x input-y 0))
+             entity)))))
 
-(defn process-hit [x y entities]
+(defn process-hit
+  "loops through entity type :roid and detects if mouse hit it, then selects that roid"
+  [x y entities]
   (map
     (fn [entity]
       (if (and (u/is-type? :roid entity)
-                (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
-                (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite))
+               (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
+               (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite))
         (assoc entity :hit? true)
         (assoc entity :hit? false)))
     entities))
 
-;; WHEN CLICKED/TOUCHED ON SCREEN
 (defn on-touch-up
-  "It must return entities."
+  "When clicked/touched on screen. It must return entities."
   [screen entities]
   (let [new-y (u/flip-y-axis screen (:input-y screen))
         new-x (:input-x screen)]

@@ -7,8 +7,9 @@
     [play-clj.math :refer :all]
     [play-clj.ui :refer :all]))
 
-;; DRAW THE ENTITY FROM THE MIDDLE
-(defn trans-pos [_ x]
+(defn trans-pos
+  "Draw the entity from the middle"
+  [_ x]
   (- x s/half-sprite))
 
 (defn flip-y-axis [screen y]
@@ -26,10 +27,14 @@
 
 (defn set-position
   "Sets the position with physics body."
-  [entity x y angle]
-  (doto
-    (assoc entity :x x :y y :angle angle)
-    (body-position! x y angle)))
+  ([entity x y]
+   (doto
+     (assoc entity :x x :y y :angle (:angle entity))
+     (body-position! x y (:angle entity))))
+  ([entity x y angle]
+   (doto
+     (assoc entity :x x :y y :angle angle)
+     (body-position! x y angle))))
 
 (defn center-x [screen]
   (- (/ (width screen) 2) s/half-sprite))
