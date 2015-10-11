@@ -98,7 +98,23 @@
              (not (rectangle! screen-rect :overlaps e-rect)))))
     entities))
 
-
+(defn reel-in [screen entities]
+  (let [{ix :x iy :y} (first (filter #(= :ship (:type %)) entities))]
+    (println "weee" ix ", " iy)
+    (println entities)
+    (map (fn [entity]
+           (if (and (= (:hit entity) true)
+                    (= (:type entity) :roid))
+             (let [x-speed (Math/abs (- ix (:x entity)))
+                   y-speed (Math/abs (- iy (:y entity)))
+                   x-dir (if (> ix (:x entity))
+                           +
+                           -)
+                   y-dir (if (> iy (:y entity))
+                           +
+                           -)]
+               (assoc entity :x-speed x-speed :y-speed y-speed :x-dir x-dir :y-dir y-dir))))
+         entities)))
 
 (defn possibly-asteroid [screen entities]
   (let [roid-image (texture (aget (:texture-roid screen) (rand-int 6) (rand-int 3)))]
@@ -117,7 +133,7 @@
   "Continuously draws at 60 fps"
   [screen entities]
   (clear!)
-  #_(step! screen entities)                                 ;; Leave until physics are needed.
+  #_(step! screen entities)
   (->> entities
        ;; all your game logic here.
        ;; (update-asteroid-status screen)
@@ -177,7 +193,8 @@
     (println (:button screen))                              ; the mouse button that was released (see button-code)
     (->> entities
          #_(update-asteroid-status screen)
-         (click-move screen)
+         #_(click-move screen)
+         (reel-in screen)
          (process-hit new-x new-y))))
 
 (defn on-hide

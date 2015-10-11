@@ -13,8 +13,8 @@
   {:type            :roid
    :attached?       false
    :resource-type   :diamond
-   :resource-amount 10
-   })
+   :resource-amount 10})
+
 
 (defn create!
   [screen texture & [x y a]]
@@ -35,7 +35,7 @@
                                    +
                                    -))))
 
-(def spawn! (partial shared/spawn! create!))
+#_(def spawn! (partial shared/spawn! create!))
 
 (def random-spawn! (partial shared/random-spawn! create!))
 
@@ -47,10 +47,20 @@
   [(u/trans-pos screen (+ s/half-sprite (width screen)))
    (- 0 (- s/half-sprite (u/y-rand screen (+ s/sprite-width (height screen)))))])
 
+(defn spawn-bottom [screen]
+  [(- 0 (- s/half-sprite (u/x-rand screen (+ s/sprite-width (width screen)))))
+   (u/trans-pos screen (- 0 s/half-sprite))])
+
+(defn spawn-left [screen]
+  [(u/trans-pos screen (- 0 s/half-sprite ))
+   (- 0 (- s/half-sprite (u/y-rand screen (+ s/sprite-width (height screen)))))])
+
 (defn spawn-off-edge [create-fun screen texture]
-  (let [spawn-pt (case (rand-int 2)
+  (let [spawn-pt (case (rand-int 4)
                    0 (spawn-top screen)
-                   1 (spawn-right screen))
+                   1 (spawn-right screen)
+                   2 (spawn-bottom screen)
+                   3 (spawn-left screen))
         new-x (first spawn-pt)
         new-y (second spawn-pt)]
     #_(println "spawning" new-x "," new-y)
