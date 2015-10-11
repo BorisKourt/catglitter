@@ -13,7 +13,8 @@
   {:type            :roid
    :attached?       false
    :resource-type   :diamond
-   :resource-amount 10})
+   :resource-amount 10
+   :hit? false})
 
 
 (defn create!

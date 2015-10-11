@@ -98,23 +98,33 @@
              (not (rectangle! screen-rect :overlaps e-rect)))))
     entities))
 
-(defn reel-in [screen entities]
+(defn check-attached
+  "Check if close enough to ship x y attach!"
+  [screen entites]
+  )
+
+(defn reel-in
+  "Changes the direction and speed of asteroid to aim towards the ship"
+  [screen entities]
   (let [{ix :x iy :y} (first (filter #(= :ship (:type %)) entities))]
-    (println "weee" ix ", " iy)
-    (println entities)
-    (map (fn [entity]
-           (if (and (= (:hit entity) true)
-                    (= (:type entity) :roid))
-             (let [x-speed (Math/abs (- ix (:x entity)))
-                   y-speed (Math/abs (- iy (:y entity)))
-                   x-dir (if (> ix (:x entity))
-                           +
-                           -)
-                   y-dir (if (> iy (:y entity))
-                           +
-                           -)]
-               (assoc entity :x-speed x-speed :y-speed y-speed :x-dir x-dir :y-dir y-dir))))
-         entities)))
+    ;(println "weee" ix ", " iy)
+    ;(println entities)
+    (map
+      (fn [entity]
+        (if (and (= :roid (:type entity))
+                 (true? (:hit? entity))
+                 (false? (:attached? entity)))
+          (let [x-speed (/ (Math/abs (- ix (:x entity))) 100)
+                y-speed (/ (Math/abs (- iy (:y entity))) 100)
+                x-dir (if (> ix (:x entity))
+                        +
+                        -)
+                y-dir (if (> iy (:y entity))
+                        +
+                        -)]
+            (assoc entity :x-speed x-speed :y-speed y-speed :x-dir x-dir :y-dir y-dir))
+          entity))
+      entities)))
 
 (defn possibly-asteroid [screen entities]
   (let [roid-image (texture (aget (:texture-roid screen) (rand-int 6) (rand-int 3)))]
@@ -136,15 +146,12 @@
   #_(step! screen entities)
   (->> entities
        ;; all your game logic here.
-       ;; (update-asteroid-status screen)
+       (reel-in screen)
+       #_(check-attached screen)
        (rand-direction screen)
        (destroy-offscreen screen)
-       #_(destroy-depleted screen)
        (possibly-cat screen)
        (possibly-asteroid screen)
-       #_((fn [entities]
-            (println "hit????" (some :hit? entities))
-            entities))
        (render! screen)))
 
 (defn random-move [screen entities]
@@ -177,8 +184,9 @@
       (if (and (u/is-type? :roid entity)
                (<= (Math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
                (<= (Math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite))
-        (assoc entity :hit? true)
-        (assoc entity :hit? false)))
+        (do (println "hit")
+            (assoc entity :hit? true))
+        entity))
     entities))
 
 (defn on-touch-up
@@ -192,9 +200,6 @@
     (println (:pointer screen))                             ; the pointer for the event
     (println (:button screen))                              ; the mouse button that was released (see button-code)
     (->> entities
-         #_(update-asteroid-status screen)
-         #_(click-move screen)
-         (reel-in screen)
          (process-hit new-x new-y))))
 
 (defn on-hide
