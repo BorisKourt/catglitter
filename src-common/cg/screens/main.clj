@@ -20,7 +20,9 @@
                  :world (box-2d (width screen) (height screen))
                  :texture-ship (texture! (texture "ship.png") :split s/sprite-width s/sprite-width)
                  :texture-roid (texture! (texture "roidsheet.png") :split s/sprite-width s/sprite-width)
-                 :texture-cat (texture! (texture "cat.png") :split s/sprite-width s/sprite-width))
+                 :texture-cat (texture! (texture "cat.png") :split s/sprite-width s/sprite-width)
+                 :ship-x 20
+                 :ship-y 20)
 
         ;; Loading the spritesheet
 
@@ -38,7 +40,7 @@
                         (range 4))
 
         ;; Creating a ship entity
-        ship (ship/spawn! screen ship-image (u/center-x screen) (u/center-y screen) 0)]
+        ship (ship/spawn! screen ship-image (:ship-x screen) (:ship-y screen) 135)]
     (conj roid-entities ship)))
 
 (defn destroy-depleted [screen entities]
@@ -73,7 +75,8 @@
   "Takes the random direction and speed asteroids spawn with and moves them"
   [screen entities]
   (map (fn [entity]
-         (if (u/is-type? :roid entity)
+         (if (and (u/is-type? :roid entity)
+                  (false? (:attached? entity)))
            (let [x-speed (:x-speed entity)
                  x-dir (:x-dir entity)
                  y-speed (:y-speed entity)
@@ -98,9 +101,28 @@
              (not (rectangle! screen-rect :overlaps e-rect)))))
     entities))
 
+
+
 (defn check-attached
   "Check if close enough to ship x y attach!"
-  [screen entites]
+  [screen entities]
+  (map
+    (fn [entity]
+      (if (and (u/is-type? :roid entity)
+               ;(<= (Math/abs (- (:ship-x screen) (+ s/half-sprite (:x entity)))) s/half-sprite)
+               ;(<= (Math/abs (- (:ship-y screen) (+ s/half-sprite (:y entity)))) s/half-sprite)
+               (>= (+ s/half-sprite (:ship-x screen)) (:x entity))
+               (>= (+ s/half-sprite (:ship-y screen)) (:y entity))
+               (true? (:hit? entity))
+               (false? (:attached? entity)))
+        (do
+          (println "YEY")
+          (assoc entity :attached? true
+                      :speed-x 0
+                      :speed-y 0
+                      :spin 0))
+        entity))
+    entities)
   )
 
 (defn reel-in
@@ -146,12 +168,12 @@
   #_(step! screen entities)
   (->> entities
        ;; all your game logic here.
-       (reel-in screen)
-       #_(check-attached screen)
-       (rand-direction screen)
-       (destroy-offscreen screen)
        (possibly-cat screen)
        (possibly-asteroid screen)
+       (check-attached screen)
+       (reel-in screen)
+       (rand-direction screen)
+       (destroy-offscreen screen)
        (render! screen)))
 
 (defn random-move [screen entities]
