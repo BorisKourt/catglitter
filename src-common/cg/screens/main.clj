@@ -9,6 +9,7 @@
     [play-clj.g2d-physics :refer :all]
     [play-clj.math :refer :all]
     [play-clj.ui :refer :all]
+    [clojure.math.numeric-tower :as math]
     [clojure.pprint :refer [pprint]]))
 
 
@@ -98,8 +99,6 @@
   (map
     (fn [entity]
       (if (and (u/is-type? :roid entity)
-               ;(<= (Math/abs (- (:ship-x screen) (+ s/half-sprite (:x entity)))) s/half-sprite)
-               ;(<= (Math/abs (- (:ship-y screen) (+ s/half-sprite (:y entity)))) s/half-sprite)
                (>= (+ s/half-sprite (:ship-x screen)) (:x entity))
                (>= (+ s/half-sprite (:ship-y screen)) (:y entity))
                (true? (:hit? entity))
@@ -125,8 +124,8 @@
         (if (and (= :roid (:type entity))
                  (true? (:hit? entity))
                  (false? (:attached? entity)))
-          (let [x-speed (/ (Math/abs (- ix (:x entity))) 100)
-                y-speed (/ (Math/abs (- iy (:y entity))) 100)
+          (let [x-speed (/ (math/abs (- ix (:x entity))) 100)
+                y-speed (/ (math/abs (- iy (:y entity))) 100)
                 x-dir (if (> ix (:x entity))
                         +
                         -)
