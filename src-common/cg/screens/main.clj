@@ -25,23 +25,12 @@
                  :ship-y 20)
 
         ;; Loading the spritesheet
-
         tiles (:texture-ship screen)
-        roid-image-a (texture (aget tiles 0 0))
-        roid-image-b (texture (aget tiles 0 1))
         ship-image (texture (aget tiles 0 2))
-
-        ;; Creating initial asteroids
-        roid-entities (mapv                                 ;; outputs a vector instead of a list (look at filterv)
-                        (fn [n]
-                          (if (even? n)
-                            (assoc (roid/random-spawn! screen roid-image-a) :attached? true)
-                            (roid/random-spawn! screen roid-image-b)))
-                        (range 4))
 
         ;; Creating a ship entity
         ship (ship/spawn! screen ship-image (:ship-x screen) (:ship-y screen) 135)]
-    (conj roid-entities ship)))
+    [ship]))
 
 (defn destroy-depleted [screen entities]
   (filter
