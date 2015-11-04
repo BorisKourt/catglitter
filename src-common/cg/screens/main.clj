@@ -106,9 +106,9 @@
         (do
           (println "YEY")
           (assoc entity :attached? true
-                      :speed-x 0
-                      :speed-y 0
-                      :spin 0))
+                        :speed-x 0
+                        :speed-y 0
+                        :spin 0))
         entity))
     entities)
   )
@@ -144,36 +144,38 @@
       entities)))
 
 (defn roid-chance
-  "spawn a roid, with a texture, and chance"
-  [screen tex-col tex-row chance entities]
+  "spawn a roid, with a texture, chance, and radius"
+  [screen tex-col tex-row chance r entities]
   (let [roid-image (texture (aget (:texture-roid screen) tex-col tex-row))]
     (if (= 5 (rand-int chance))
-      (conj entities (roid/spawn-edge! screen roid-image))
+      (do (conj entities (roid/spawn-edge! screen roid-image))
+          #_(assoc roid/roid-base :radius r))
       entities)))
 
 (defn possibly-roid
   "Spawn chances for all roids"
   [screen entities]
   #_(do (roid-chance screen 0 1 100 entities)
-      (roid-chance screen 4 2 100 entities))
-  (do (roid-chance screen 0 0 100 entities)
-      (roid-chance screen 0 1 100 entities)
-      (roid-chance screen 0 2 100 entities)
-      (roid-chance screen 1 0 100 entities)
-      (roid-chance screen 1 1 100 entities)
-      (roid-chance screen 1 2 100 entities)
-      (roid-chance screen 2 0 100 entities)
-      (roid-chance screen 2 1 100 entities)
-      (roid-chance screen 2 2 100 entities)
-      (roid-chance screen 3 0 100 entities)
-      (roid-chance screen 3 1 100 entities)
-      (roid-chance screen 3 2 100 entities)
-      (roid-chance screen 4 0 100 entities)
-      (roid-chance screen 4 1 100 entities)
-      (roid-chance screen 4 2 100 entities)
-      (roid-chance screen 5 0 100 entities)
-      (roid-chance screen 5 1 100 entities)
-      (roid-chance screen 5 2 100 entities)))
+        (roid-chance screen 4 2 100 entities))
+  (->> entities
+      (roid-chance screen 0 0 100 64)
+      (roid-chance screen 0 1 100 50)
+      (roid-chance screen 0 2 100 40)
+      (roid-chance screen 1 0 100 64)
+      (roid-chance screen 1 1 100 50)
+      (roid-chance screen 1 2 100 40)
+      (roid-chance screen 2 0 100 64)
+      (roid-chance screen 2 1 100 50)
+      (roid-chance screen 2 2 100 40)
+      (roid-chance screen 3 0 100 64)
+      (roid-chance screen 3 1 100 50)
+      (roid-chance screen 3 2 100 40)
+      (roid-chance screen 4 0 100 64)
+      (roid-chance screen 4 1 100 50)
+      (roid-chance screen 4 2 100 40)
+      (roid-chance screen 5 0 100 64)
+      (roid-chance screen 5 1 100 50)
+      (roid-chance screen 5 2 100 40)))
 
 (defn possibly-cat [screen entities]
   (let [cat (texture (aget (:texture-cat screen) 0 0))]
