@@ -10,11 +10,10 @@
     [play-clj.ui :refer :all]))
 
 (def roid-base
-  {:type            :roid
-   :attached?       false
-   :resource-type   :diamond
-   :resource-amount 10
-   :hit? false})
+  {:type :roid
+   :attached? false
+   :hit? false
+   :bounced? false})
 
 
 (defn create!
@@ -25,18 +24,11 @@
          (shared/base-physics-entity screen x y a)
 
          ;; Game Logic:
-         (assoc roid-base :resource (inc (rand-int 9))
-                          :spin (rand-nth (range -0.5 0.5 0.01))
+         (assoc roid-base :spin (rand-nth (range -0.5 0.5 0.01))
                           :x-speed (rand-nth (range 0.2 1 0.2))
                           :y-speed (rand-nth (range 0.2 1 0.2))
-                          :x-dir (if (= 0 (rand-int 2))
-                                   +
-                                   -)
-                          :y-dir (if (= 0 (rand-int 2))
-                                   +
-                                   -))))
-
-#_(def spawn! (partial shared/spawn! create!))
+                          :x-dir (if (= 0 (rand-int 2)) + -)
+                          :y-dir (if (= 0 (rand-int 2)) + -))))
 
 (def random-spawn! (partial shared/random-spawn! create!))
 
@@ -53,7 +45,7 @@
    (u/trans-pos screen (- 0 s/half-sprite))])
 
 (defn spawn-left [screen]
-  [(u/trans-pos screen (- 0 s/half-sprite ))
+  [(u/trans-pos screen (- 0 s/half-sprite))
    (- 0 (- s/half-sprite (u/y-rand screen (+ s/sprite-width (height screen)))))])
 
 (defn spawn-off-edge [create-fun screen texture]
@@ -64,7 +56,7 @@
                    3 (spawn-left screen))
         new-x (first spawn-pt)
         new-y (second spawn-pt)]
-    #_(println "spawning" new-x "," new-y)
+
     (shared/spawn-with-physics!
       create-fun
       screen texture

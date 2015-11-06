@@ -10,7 +10,8 @@
     [play-clj.ui :refer :all]))
 
 (def ship-base
-  {:type :ship})
+  {:type :ship
+   :radius 45})
 
 (defn create!
   [screen texture & [x y a]]
