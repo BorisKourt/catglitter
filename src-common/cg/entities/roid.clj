@@ -18,7 +18,7 @@
 
 
 (defn create!
-  [screen texture & [x y a r]]
+  [screen texture & [x y a]]
   (merge texture
 
          ;; Engine Bits

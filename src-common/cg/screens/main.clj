@@ -31,6 +31,7 @@
 
         ;; Creating a ship entity
         ship (ship/spawn! screen ship-image (:ship-x screen) (:ship-y screen) 135)]
+    (update! screen :blob [ship])
     [ship]))
 
 (defn destroy-depleted [screen entities]
@@ -142,44 +143,48 @@
       (do #_(println "Entities: " (count entities))
         (conj entities (roid/spawn-edge! screen roid-image)))
       entities)))
+;
+;(defn roid-chance
+;  "spawn a roid, with a texture, chance, and radius"
+;  [screen tex-col tex-row chance r entities]
+;  (let [roid-image (texture (aget (:texture-roid screen) tex-col tex-row))]
+;    (if (= 5 (rand-int chance))
+;      (do (conj entities (roid/spawn-edge! screen roid-image))
+;          #_(assoc roid/roid-base :radius r))
+;      entities)))
 
-(defn roid-chance
-  "spawn a roid, with a texture, chance, and radius"
-  [screen tex-col tex-row chance r entities]
-  (let [roid-image (texture (aget (:texture-roid screen) tex-col tex-row))]
-    (if (= 5 (rand-int chance))
-      (do (conj entities (roid/spawn-edge! screen roid-image))
-          #_(assoc roid/roid-base :radius r))
-      entities)))
+
+(defn which? [n]
+  (cond
+    (< n 76)
+    0
+    (and (>= n 76) (< n 92))
+    1
+    (>= n 92)
+    2
+    :else nil))
 
 (defn possibly-roid
-  "Spawn chances for all roids"
+  "Spawns roids with different texture, chance of occurance, and radius"
   [screen entities]
-  #_(do (roid-chance screen 0 1 100 entities)
-        (roid-chance screen 4 2 100 entities))
-  (->> entities
-      (roid-chance screen 0 0 100 64)
-      (roid-chance screen 0 1 100 50)
-      (roid-chance screen 0 2 100 40)
-      (roid-chance screen 1 0 100 64)
-      (roid-chance screen 1 1 100 50)
-      (roid-chance screen 1 2 100 40)
-      (roid-chance screen 2 0 100 64)
-      (roid-chance screen 2 1 100 50)
-      (roid-chance screen 2 2 100 40)
-      (roid-chance screen 3 0 100 64)
-      (roid-chance screen 3 1 100 50)
-      (roid-chance screen 3 2 100 40)
-      (roid-chance screen 4 0 100 64)
-      (roid-chance screen 4 1 100 50)
-      (roid-chance screen 4 2 100 40)
-      (roid-chance screen 5 0 100 64)
-      (roid-chance screen 5 1 100 50)
-      (roid-chance screen 5 2 100 40)))
+  (if (= 5 (rand-int 75))
+    (let [types [:c :s :m]
+          num-type (which? (rand-int 100))
+          type (nth types num-type)
+          p-size (rand-int 100)
+          size (which? p-size)
+          resource-by-range [10 40 70]
+          roid-image (texture (aget (:texture-roid screen)  num-type (- 2 size)))]
+      (conj entities
+            (assoc (roid/spawn-edge! screen roid-image)
+              :roid-type type
+              :radius p-size
+              :ore (+ (rand 20) (nth resource-by-range size)))))
+    entities))
 
 (defn possibly-cat [screen entities]
   (let [cat (texture (aget (:texture-cat screen) 0 0))]
-    (if (= 5 (rand-int 1000))
+    (if (= 5 (rand-int 10000))
       (conj entities (roid/spawn-edge! screen cat))
       entities)))
 
@@ -229,6 +234,7 @@
                (<= (math/abs (- x (+ s/half-sprite (:x entity)))) s/half-sprite)
                (<= (math/abs (- y (+ s/half-sprite (:y entity)))) s/half-sprite))
         (do (println "hit")
+            (println (:ore entity))
             (assoc entity :hit? true))
         entity))
     entities))
