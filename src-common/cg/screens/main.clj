@@ -12,17 +12,19 @@
     [clojure.math.numeric-tower :as math]
     [clojure.pprint :refer [pprint]]))
 
+(defn play-music []
+  (music "musicloop.wav"))
 
 (defn on-show [screen entities]
-  (let [screen
-        (update! screen
-                 :renderer (stage)
-                 :world (box-2d (width screen) (height screen))
-                 :texture-ship (texture! (texture "ship.png") :split s/sprite-width s/sprite-width)
-                 :texture-roid (texture! (texture "roidsheet.png") :split s/sprite-width s/sprite-width)
-                 :texture-cat (texture! (texture "cat.png") :split s/sprite-width s/sprite-width)
-                 :ship-x 20
-                 :ship-y 20)
+  (let [screen (update! screen
+                        :renderer (stage)
+                        :world (box-2d (width screen) (height screen))
+                        :texture-ship (texture! (texture "ship.png") :split s/sprite-width s/sprite-width)
+                        :texture-roid (texture! (texture "roidsheet.png") :split s/sprite-width s/sprite-width)
+                        :texture-cat (texture! (texture "cat.png") :split s/sprite-width s/sprite-width)
+                        :ship-x 20
+                        :ship-y 20
+                        :new-music (play-music))
 
         ;; Loading the spritesheet
         tiles (:texture-ship screen)
@@ -204,6 +206,7 @@
   #_(step! screen entities)
   (->> entities
        ;; all your game logic here.
+ ;;      (music "musicloop.wav" :play)
        (possibly-roid screen)
        (check-attached screen)
        (reel-in screen)
